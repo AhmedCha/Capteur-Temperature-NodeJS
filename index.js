@@ -5,7 +5,7 @@ const mqtt = require('mqtt');
 const path = require('path');
 
 // Firebase Admin Initialization
-var serviceAccount = require("./cothings-esp32-firebase-adminsdk-andwh-a83e410011.json");
+var serviceAccount = require("./cothings-esp32-firebase-adminsdk.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -17,11 +17,11 @@ const ref = db.ref('TemperatureSensorData');
 
 // MQTT Options with TLS
 const mqttOptions = {
-  host: 'e22f6f30caa64f7d9f93f78b12f79d04.s1.eu.hivemq.cloud',
+  host: 'c6780cfec9814f9eae33835beeda43f3.s1.eu.hivemq.cloud',
   port: 8883,
   protocol: 'mqtts',
-  username: 'nodejs',
-  password: 'Testtest1',
+  username: 'MQTT-Firebase',
+  password: 'Secure*Password1',
   rejectUnauthorized: false,
 };
 
@@ -43,12 +43,14 @@ mqttClient.on('message', (topic, message) => {
 
   const currentTime = Date.now();
   const formattedTime = convertTimestampToCET(currentTime);
+  let temperature = parseFloat(message.toString()).toFixed(2);
 
   ref.push({
-    Temperature: message.toString(),	
+    temperature: temperature,
     timestamp: formattedTime,
   });
 });
+
 
 mqttClient.on('error', (error) => {
   console.error(`MQTT Client Error: ${error}`);
@@ -63,11 +65,10 @@ mqttClient.on('reconnect', () => {
 });
 
 function convertTimestampToCET(timestamp) {
-    // Create a date object from the timestamp
-    let date = new Date(timestamp);
+  // Create a date object from the timestamp
+  let date = new Date(timestamp);
 
-    // Convert to CET/CEST using toLocaleString
-    let formattedDate = date.toLocaleString('en-GB', { timeZone: 'Europe/Paris' });
-
-    return formattedDate;
+  // Convert to CET/CEST using toLocaleString
+  let formattedDate = date.toLocaleString('en-GB', { timeZone: 'Africa/Tunis' });
+  return formattedDate;
 }
