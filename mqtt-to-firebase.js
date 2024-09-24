@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const admin = require("firebase-admin");
 const mqtt = require('mqtt');
-const path = require('path');
 
 // Firebase Admin Initialization
 var serviceAccount = require("./cothings-esp32-firebase-adminsdk.json");
@@ -27,6 +26,7 @@ const mqttOptions = {
 
 const mqttClient = mqtt.connect(mqttOptions);
 
+//Connect to MQTT
 mqttClient.on('connect', () => {
   console.log('Connected to MQTT broker');
   mqttClient.subscribe('#', (err) => {
@@ -38,33 +38,20 @@ mqttClient.on('connect', () => {
   });
 });
 
+//Transfer code from MQTT to firebase
 mqttClient.on('message', (topic, message) => {
   console.log(`Received message: ${message.toString()} on topic: ${topic}`);
 
-  const currentTime = Date.now();
-  const formattedTime = convertTimestampToCET(currentTime);
+  const currentTime = ConvertToCurrentTime(Date.now());
   let temperature = parseFloat(message.toString()).toFixed(2);
 
   ref.push({
     temperature: temperature,
-    timestamp: formattedTime,
+    timestamp: currentTime,
   });
 });
 
-
-mqttClient.on('error', (error) => {
-  console.error(`MQTT Client Error: ${error}`);
-});
-
-mqttClient.on('offline', () => {
-  console.log('MQTT Client is offline');
-});
-
-mqttClient.on('reconnect', () => {
-  console.log('MQTT Client is reconnecting');
-});
-
-function convertTimestampToCET(timestamp) {
+function ConvertToCurrentTime(timestamp) {
   // Create a date object from the timestamp
   let date = new Date(timestamp);
 
