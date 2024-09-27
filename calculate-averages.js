@@ -35,7 +35,7 @@ const filterDataByTimeRange = (data, startTime, endTime) => {
 };
 
 /**
- * Format a date object to "DD/MM/YYYY, HH:MM" string
+ * Format the date to "DD/MM/YYYY, HH:MM" string
  */
 const formatTimestamp = (date) => {
   const day = String(date.getDate()).padStart(2, "0");
@@ -147,7 +147,7 @@ const fetchOrCalculateAverages = async () => {
     const now = new Date().getTime();
 
     // Check if cached data exists and was updated less than an hour ago
-    if (cachedAverages && now - cachedAverages.lastUpdated < ONE_HOUR) {
+    if (cachedAverages && now - cachedAverages.lastUpdated < ONE_HOUR && now % ONE_HOUR < ONE_HOUR * 0.9166) {
       console.log("Returning cached averages.");
       return cachedAverages; // Return cached averages
     }
@@ -183,10 +183,9 @@ const fetchOrCalculateAverages = async () => {
 setInterval(() => {
   console.log("Checking for new temperature data...");
   fetchOrCalculateAverages();
-}, ONE_HOUR/60); // Runs every minute
+}, ONE_HOUR / 30); // Runs every minute
 
 
 
 // Run the first check immediately
 fetchOrCalculateAverages();
-
