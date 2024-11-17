@@ -3,7 +3,7 @@ const ONE_HOUR = 60 * 60 * 1000;
 const ONE_DAY = 24 * ONE_HOUR;
 
 // Firebase Admin Initialization
-var serviceAccount = require("./cothings-esp32-firebase-adminsdk.json");
+var serviceAccount = require("./firebase-adminsdk.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -83,10 +83,10 @@ const getHourlyAverages = (data) => {
     const temperature = calculateAverage(hourData).toFixed(2);
     const timestamp = formatTimestamp(endTime); // Format as "DD/MM/YYYY, HH:00"
 
-    hourlyAverages.unshift({ timestamp, temperature }); // Insert at the beginning to reverse the order
+    hourlyAverages.unshift({ timestamp, temperature }); 
   }
 
-  return hourlyAverages; // Array of 24 objects with "hour" and "average"
+  return hourlyAverages;
 };
 
 /**
@@ -104,10 +104,10 @@ const getDailyAverages = (data, days) => {
     const temperature = calculateAverage(dayData).toFixed(2);
     const timestamp = formatDate(new Date(endTime)); // Get the formatted date
 
-    dailyAverages.unshift({ timestamp, temperature }); // Insert at the beginning to reverse the order
+    dailyAverages.unshift({ timestamp, temperature }); 
   }
 
-  return dailyAverages; // Array of `days` objects with "date" and "average"
+  return dailyAverages;
 };
 
 /**
@@ -142,50 +142,43 @@ const fetchTemperatureData = async () => {
  */
 const fetchOrCalculateAverages = async () => {
   try {
-    // Fetch cached averages from Firebase
+    /*  Fetch cached averages from Firebase */
     const cachedAverages = await fetchAveragesFromFirebase();
     const now = new Date().getTime();
 
-    // Check if cached data exists and was updated less than an hour ago
-    if (cachedAverages && now - cachedAverages.lastUpdated < ONE_HOUR && now % ONE_HOUR < ONE_HOUR * 0.9166) {
-      console.log("Returning cached averages.");
-      return cachedAverages; // Return cached averages
+    /* Check if cached data was updated less than an hour ago and it is at least 55 minutes this hour */
+    if (now - cachedAverages.lastUpdated > ONE_HOUR * 55 / 60 && now % ONE_HOUR > ONE_HOUR * 55 / 60) {
+      // Fetch raw temperature data from Firebase and calculate new averages
+      const data = await fetchTemperatureData();
+
+      const last24HourAverages = getHourlyAverages(data);
+      const lastWeekAverages = getDailyAverages(data, 7);
+      const lastMonthAverages = getDailyAverages(data, 30);
+
+      const averages = {
+        last24HourAverages,
+        lastWeekAverages,
+        lastMonthAverages,
+      };
+
+      await saveAveragesToFirebase(averages);
+
+      console.log("New averages calculated and saved.");
+      return averages;
     }
 
-    // Fetch raw temperature data from Firebase
-    const data = await fetchTemperatureData();
-
-    // Calculate new averages if no cached data or it's too old
-    const last24HourAverages = getHourlyAverages(data);
-    const lastWeekAverages = getDailyAverages(data, 7);
-    const lastMonthAverages = getDailyAverages(data, 30);
-
-    const averages = {
-      last24HourAverages,
-      lastWeekAverages,
-      lastMonthAverages,
-    };
-
-    // Save newly calculated averages with the current timestamp
-    await saveAveragesToFirebase(averages);
-
-    console.log("New averages calculated and saved.");
-    return averages;
+    /* Returns the previously calculated data */
+    console.log("Returning cached averages.");
+    return cachedAverages;
   } catch (error) {
     console.error("Error fetching or calculating averages:", error);
   }
 };
 
-
-/**
- * Set up periodic data fetching every hour
- */
+/* Set up periodic data fetching every 2 mnutes */
 setInterval(() => {
   console.log("Checking for new temperature data...");
   fetchOrCalculateAverages();
-}, ONE_HOUR / 30); // Runs every minute
+}, ONE_HOUR / 30);
 
-
-
-// Run the first check immediately
 fetchOrCalculateAverages();

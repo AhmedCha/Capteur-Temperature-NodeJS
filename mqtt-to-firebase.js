@@ -4,7 +4,7 @@ const admin = require("firebase-admin");
 const mqtt = require('mqtt');
 
 // Firebase Admin Initialization
-var serviceAccount = require("./cothings-esp32-firebase-adminsdk.json");
+var serviceAccount = require("./firebase-adminsdk.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
