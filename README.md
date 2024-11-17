@@ -20,7 +20,7 @@ This project serves as the backend for a mobile application, handling data trans
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/AhmedCha/Projet-DevWeb.git
+   git clone https://github.com/AhmedCha/Capteur-Temperature-NodeJS.git
    ```
 2. Get adminsdk .json file from Firebase and copy it to root directory as ```firebase-adminsdk.json```
 3. Install dependencies using ```npm install```.
