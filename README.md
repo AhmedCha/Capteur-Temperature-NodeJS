@@ -1,3 +1,4 @@
+
 # Mobile App Backend for Real-Time Data Processing
 
 This project serves as the backend for a mobile application, handling data transfer from an MQTT broker to Firebase realtime database and performing real-time calculations. Built in JavaScript with Node.js.
@@ -21,8 +22,9 @@ This project serves as the backend for a mobile application, handling data trans
    ```bash
    git clone https://github.com/AhmedCha/Projet-DevWeb.git
    ```
-2. Get Firebase Admin SDK credentials file from Firebase and copy it to root directory as ```firebase-adminsdk.json```
-3. Run the server: 
+2. Get adminsdk .json file from Firebase and copy it to root directory as ```firebase-adminsdk.json```
+3. Install dependencies using ```npm install```.
+4. Run the server: 
 - To send MQTT data to Firebase, use:
    ```
    node mqtt-to-firebase.js
@@ -31,3 +33,4 @@ This project serves as the backend for a mobile application, handling data trans
    ```
    node calculate-averages.js
    ``` 
+Alternatively you can simply execute ```Start-calculate-averages.bat``` or ```Start-mqtt-to-firebase.bat```
